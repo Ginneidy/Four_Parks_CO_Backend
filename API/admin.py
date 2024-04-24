@@ -8,5 +8,7 @@ admin.site.register(m.Booking)
 admin.site.register(m.City)
 admin.site.register(m.Parking_type)
 admin.site.register(m.Loyalty)
+admin.site.register(m.Vehicle)
+
 
 admin.site.site_header = 'Four_Parks_CO'
