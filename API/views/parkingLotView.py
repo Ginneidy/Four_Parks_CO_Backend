@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from API.models.parkingLotModel import ParkingLot
 from API.serializers.parkingLotSerializer import ParkingLotSerializer
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
@@ -17,7 +18,6 @@ class ParkingLotViewSet(viewsets.ModelViewSet):
             return ParkingLot.objects.get(id=parking_id)
         except ParkingLot.DoesNotExist:
             return None
-
     def get(self, request, parking_id, *args, **kwargs):
         parking = self.get_parking(parking_id)
         if not parking:
@@ -26,7 +26,19 @@ class ParkingLotViewSet(viewsets.ModelViewSet):
             )
         serializer = ParkingLotSerializer(parking)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    @action(detail=False, methods=['GET'], url_path="capacities", url_name="capacities")
+    def capacities(self, request):
+        parking_lots = self.get_queryset()  
+        capacities_data = []
+        for parking_lot in parking_lots:
+            capacities_data.append({
+            "id": parking_lot.id,
+            "name": parking_lot.name,
+            "current_capacity": parking_lot.get_current_capacity(),
+            "total_capacity": parking_lot.spaces
+        })
+        return Response(capacities_data, status=status.HTTP_200_OK)
+    
     def post(self, request, *args, **kwargs):
         parkingLot = {
             "name": request.data.get("name"),
@@ -45,8 +57,8 @@ class ParkingLotViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, parking_id, *args, **kwargs):
-        parking = self.get_parking(parking_id)
-        if not parking:
+        parkingLot = self.get_parking(parking_id)
+        if not parkingLot:
             return Response(
                 {"res": "El parqueadero no existe"}, status=status.HTTP_404_NOT_FOUND
             )
@@ -61,7 +73,7 @@ class ParkingLotViewSet(viewsets.ModelViewSet):
             "parking_type_id": request.parking_type.id,
             "loyalty_id": request.loyalty.id,
         }
-        serializer = ParkingLotSerializer(parking, data=request.data, partial=True)
+        serializer = ParkingLotSerializer(parkingLot, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,4 +1,3 @@
-````
 # Four Parks CO Backend
 
 Este proyecto consiste en el desarrollo de un sistema de gestión de parqueaderos que permite a los usuarios reservar espacios de estacionamiento, administrar sus reservas, realizar pagos y acceder a información detallada sobre los parqueaderos disponibles.
@@ -15,7 +14,7 @@ Este proyecto consiste en el desarrollo de un sistema de gestión de parqueadero
 
    ```bash
    git clone https://github.com/londono27/Four-Park-CO.git
-   ````
+   ```
 
 2. Ve al directorio del proyecto:
 

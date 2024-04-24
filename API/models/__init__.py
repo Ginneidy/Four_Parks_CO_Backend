@@ -1,5 +1,5 @@
 from API.models.parkingLotModel import ParkingLot
-from API.models.loyalityModel import Loyality
+from API.models.loyalityModel import Loyalty
 from API.models.userModel import User
 from API.models.cityModel import City
 from API.models.parkingTypeModel import Parking_type
