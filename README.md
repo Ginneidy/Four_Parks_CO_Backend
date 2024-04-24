@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5f8d52f06da1b40dfad06b45eb7c7858b6df3a81
 # Four Parks CO Backend
 
 Este proyecto consiste en el desarrollo de un sistema de gestión de parqueaderos que permite a los usuarios reservar espacios de estacionamiento, administrar sus reservas, realizar pagos y acceder a información detallada sobre los parqueaderos disponibles.
