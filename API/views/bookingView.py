@@ -31,9 +31,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = {
             "check_in": request.data.get("check_in"),
             "check_out": request.data.get("check_out"),
-            "client_id": request.data.get("client_id"),
-            "parking_id": request.data.get("parking_id"),
-            "vehicle_id": request.data.get("vehicle_id")
+            "client_id": request.user.id,
+            "parking_id": request.parkinglot.id,
+            "vehicle_id": request.vehicle.id,
             }
         serializer = BookingSerializer(data=booking)
         if serializer.is_valid():
@@ -50,9 +50,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         booking = {
             "check_in": request.data.get("check_in"),
             "check_out": request.data.get("check_out"),
-            "client_id": request.data.get("client_id"),
-            "parking_id": request.data.get("parking_id"),
-            "vehicle_id": request.data.get("vehicle_id")
+            "client_id": request.user.id,
+            "parking_id": request.parkinglot.id,
+            "vehicle_id": request.vehicle.id,
             }
         serializer = BookingSerializer(booking, data=request.data, partial=True)
         if serializer.is_valid():
