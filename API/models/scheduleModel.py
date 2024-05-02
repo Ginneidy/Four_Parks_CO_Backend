@@ -1,7 +1,11 @@
 from django.db import models
+from API.models.baseModel import BaseModel
 
+class Schedule(BaseModel):
+    week_day = models.IntegerField()
+    opening_time = models.DateTimeField()
+    closing_time = models.DateTimeField()
 
-class Schedule(models.Model):
-    id = models.AutoField(primary_key=True)
-    opening_time = models.TimeField()
-    closing_time = models.TimeField()
+    class Meta:
+        managed = False
+        db_table = 'schedule'

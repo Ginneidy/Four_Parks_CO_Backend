@@ -1,8 +1,11 @@
 from django.db import models
+from API.models.baseModel import BaseModel
 from API.models.vehicleTypeModel import VehicleType
 
-class Vehicle(models.Model):
-   id = models.AutoField(primary_key=True)
-   plate = models.CharField(max_length=30)
-   vehicle_type_id = models.ForeignKey(VehicleType, on_delete=models.CASCADE)
-   
+class Vehicle(BaseModel):
+    plate = models.CharField(unique=True, max_length=8)
+    vehicle_type = models.ForeignKey(VehicleType, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'vehicle'

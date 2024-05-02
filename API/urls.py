@@ -1,4 +1,17 @@
-from django.urls import path,include
+from rest_framework.routers import DefaultRouter
+from django.urls import path, include
+import API.views as Views
+
+
+
+router = DefaultRouter()
+router.register('bills', Views.BillViewSet, basename='bill')
+urlpatterns = [
+   path('', include(router.urls)),
+]
+
+
+"""from django.urls import path,include
 from rest_framework import routers
 import API.views as v
 
@@ -13,3 +26,4 @@ router.register(r'vehicles', v.VehicleViewSet, basename='vehicle')
 urlpatterns = [
    path('', include(router.urls)),
 ]
+"""

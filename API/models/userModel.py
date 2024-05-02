@@ -1,18 +1,16 @@
 from django.db import models
+from API.models.baseModel import BaseModel
 
 class User(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=30)
+    user_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=30)
-    username = models.CharField(max_length=30)
-    email_address = models.CharField(max_length=30)
-    password = models.CharField(max_length=30)
-    ip_address = models.CharField(max_length=30, default="0.0.0.0")
-    document_type = models.CharField(max_length=30)
-    document = models.CharField(max_length=30, default=None)
-    name_credit_card = models.CharField(max_length=30, default=None)
-    credit_number_card = models.IntegerField(default=None)
-    token = models.CharField(max_length=30, default=None)    
-    
-    def __str__(self):
-        return self.name
+    email_address = models.CharField(unique=True, max_length=40)
+    user_password = models.CharField(max_length=30)
+    document_type = models.CharField()
+    user_document = models.CharField(unique=True, max_length=20)
+    user_token = models.CharField(max_length=10, blank=True, null=True)
+    ip_address = models.CharField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'user'

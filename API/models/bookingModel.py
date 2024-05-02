@@ -1,14 +1,16 @@
 from django.db import models
-
+from API.models.baseModel import BaseModel
 from API.models.userModel import User
-from API.models.parkingLotModel import ParkingLot
+from API.models.parkingModel import Parking
 from API.models.vehicleModel import Vehicle
 
+class Booking(BaseModel):
+    check_in = models.DateTimeField()
+    user = models.ForeignKey(User, models.DO_NOTHING, db_comment='Es el usuario que hizo la reserva')
+    parking = models.ForeignKey(Parking, models.DO_NOTHING)
+    vehicle = models.ForeignKey(Vehicle, models.DO_NOTHING)
+    check_out = models.DateTimeField()
 
-class Booking(models.Model):
-   id = models.AutoField(primary_key=True)
-   check_in = models.DateTimeField()
-   check_out = models.DateTimeField()
-   client_id = models.ForeignKey(User, on_delete=models.CASCADE)
-   parking_id = models.ForeignKey(ParkingLot, on_delete=models.CASCADE)
-   vehicle_id = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    class Meta:
+        managed = False
+        db_table = 'booking'
