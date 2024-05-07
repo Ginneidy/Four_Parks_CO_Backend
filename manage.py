@@ -7,7 +7,6 @@ from Four_Parks_CO.settings import base
 
 def main():
     """Run administrative tasks."""
-    
     if base.DEBUG:
         os.environ.setdefault(
             "DJANGO_SETTINGS_MODULE", "Four_Parks_CO.settings.development"
