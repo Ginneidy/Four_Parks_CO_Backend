@@ -22,5 +22,4 @@ class User(BaseModel):
     class Meta:
         managed = False
         db_table = "user"
-        
 
