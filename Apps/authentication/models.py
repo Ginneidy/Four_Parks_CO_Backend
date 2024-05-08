@@ -8,7 +8,7 @@ class Role(BaseModel):
         managed = False
         db_table = 'role'
         
-class User(models.Model):
+class User(BaseModel):
     user_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=30)
     email_address = models.CharField(unique=True, max_length=40)
