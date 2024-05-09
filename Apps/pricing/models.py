@@ -1,9 +1,14 @@
 from django.db import models
 from Apps.baseModel import BaseModel
-from Apps.pricing.models import FeeType
 from Apps.vehicle.models import VehicleType
 from Apps.authentication.models import User
 
+class FeeType(BaseModel):
+    description = models.CharField(unique=True, max_length=30, db_comment='El tipo de tarifa que es (hora, dia, minuto)')
+
+    class Meta:
+        managed = False
+        db_table = 'fee_type'
         
 class Fee(BaseModel):
     amount = models.IntegerField()
@@ -13,13 +18,6 @@ class Fee(BaseModel):
     class Meta:
         managed = False
         db_table = 'fee'
-        
-class FeeType(BaseModel):
-    description = models.CharField(unique=True, max_length=30, db_comment='El tipo de tarifa que es (hora, dia, minuto)')
-
-    class Meta:
-        managed = False
-        db_table = 'fee_type'
         
 class Loyalty(BaseModel):
     amount_points = models.IntegerField(db_comment='La cantidad de dinero que da 1 un punto')

@@ -1,9 +1,9 @@
 from django.db import models
 from Apps.authentication.models import User
-from Apps.parking.models import City
-from Apps.parking.models import ParkingType
-from Apps.pricing.models import Loyalty
 from Apps.pricing.models import Fee
+from Apps.pricing.models import Loyalty
+
+
 from Apps.baseModel import BaseModel
 
 class Schedule(BaseModel):
@@ -14,6 +14,20 @@ class Schedule(BaseModel):
     class Meta:
         managed = False
         db_table = 'schedule'
+
+class ParkingType(BaseModel):
+    description = models.CharField(unique=True, max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'parking_type'
+
+class City(BaseModel):
+    city_name = models.CharField(unique=True, max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'city'
         
 class Parking(BaseModel):  
     park_name = models.CharField(unique=True, max_length=40)
@@ -29,17 +43,3 @@ class Parking(BaseModel):
     class Meta:
         managed = False
         db_table = 'parking'
-        
-class ParkingType(BaseModel):
-    description = models.CharField(unique=True, max_length=30)
-
-    class Meta:
-        managed = False
-        db_table = 'parking_type'
-
-class City(BaseModel):
-    city_name = models.CharField(unique=True, max_length=30)
-
-    class Meta:
-        managed = False
-        db_table = 'city'
