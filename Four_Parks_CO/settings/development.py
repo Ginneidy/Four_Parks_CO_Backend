@@ -35,3 +35,11 @@ CORS_ALLOW_METHODS = (
     "POST",
     "PUT",
 )
+# Send email
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "fourparksdsp@gmail.com"
+EMAIL_HOST_PASSWORD = "ihyb omyz fkwa fjbw"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
