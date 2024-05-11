@@ -10,6 +10,7 @@ class FeeType(BaseModel):
         managed = False
         db_table = 'fee_type'
 
+        
 class Fee(BaseModel):
     amount = models.IntegerField()
     fee_type = models.ForeignKey(FeeType, on_delete=models.CASCADE, related_name='fees_related_to_fee_type')

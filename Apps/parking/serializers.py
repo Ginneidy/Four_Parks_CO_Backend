@@ -28,4 +28,5 @@ class ParkingSerializer(serializers.ModelSerializer):
     fee = FeeSerializer(many=True, read_only=True)
     class Meta:
         model = Parking
-        fields = "__all__"
+        fields = '__all__'
+    

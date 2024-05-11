@@ -16,8 +16,12 @@ class FeeSerializer(serializers.ModelSerializer):
         model = Fee
         fields = ["amount", "fee_type", "vehicle_type"]
 
-
 class LoyaltySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Loyalty
-        fields = "__all__"
+   class Meta:
+      model = Loyalty
+      fields = '__all__'
+      
+class PointsSerializer(serializers.ModelSerializer):
+   class Meta:
+      model = Points
+      fields = ["amount"]
