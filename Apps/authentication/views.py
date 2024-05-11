@@ -14,15 +14,23 @@ from .models import User, Role
 from .serializers import UserSerializer
 from rest_framework.decorators import action
 
+
 # Function to send activation email
 def send_activation_mail(email, activation_code):
     subject = "User Activation Four Parks"
     message = (
-        f"Thank you for signing up! This is your activation code: {activation_code}"
+        f"Gracias por registrarte! Este es tu código de activación: {activation_code}"
     )
-    send_mail(
-        subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False
-    )
+    send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+
+# Function for user password hashing
+def hash_password(password):
+    return hashlib.md5(password.encode()).hexdigest()
+
+# Function for validating email
+def is_valid_email(email):
+    return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email)
+
 
 # ViewSet for User operations
 class UserViewSet(viewsets.ModelViewSet):
@@ -30,13 +38,14 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     # Action to handle user login
+    # /api/auth/users/login/
     @action(detail=False, methods=["POST"])
     def login(self, request, *args, **kwargs):
         email_address = request.data.get("email_address")
         user_password = request.data.get("user_password")
 
         # Encrypt the user-provided password with MD5
-        user_password_md5 = hashlib.md5(user_password.encode()).hexdigest()
+        user_password_md5 = hash_password(user_password)
 
         user = User.objects.filter(email_address=email_address)
 
@@ -57,6 +66,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
     # Action to handle user registration
+    # /api/auth/users/register/
     @action(detail=False, methods=["POST"])
     def register(self, request):
         data = request.data
@@ -90,7 +100,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         # Validation of email
         email = data.get("email_address")
-        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
+        if not is_valid_email(email):
             return Response(
                 {"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -127,7 +137,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         # Encrypting the password
-        hashed_password = hashlib.md5(password.encode()).hexdigest()
+        hashed_password = hash_password(password)
 
         # Activation code generation
         activation_code = "".join(
@@ -166,3 +176,26 @@ class UserViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    # Action to verify user account
+    # /api/auth/users/verify_account/
+    @action(detail=False, methods=["POST"])
+    def verify_account(self, request):
+        user_id = request.data.get("id")
+        user_token = request.data.get("user_token")
+
+        try:
+            user = User.objects.get(id=user_id)
+            if user.user_token == user_token:
+                user.user_token = None
+                user.save()
+                return Response(
+                    "Successfully verified account", status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    "Invalid activation code", status=status.HTTP_400_BAD_REQUEST
+                )
+        except User.DoesNotExist:
+            return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)

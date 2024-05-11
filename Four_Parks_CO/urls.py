@@ -5,7 +5,7 @@ from rest_framework.documentation import include_docs_urls
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("docs/", include_docs_urls(title="Four_Parks_CO API Documentation")),
-    path("api/authentication/", include("Apps.authentication.urls")),
+    path("api/auth/", include("Apps.authentication.urls")),
     path("api/parking/", include("Apps.parking.urls")),
 ]
 
