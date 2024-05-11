@@ -9,6 +9,7 @@ class FeeType(BaseModel):
     class Meta:
         managed = False
         db_table = 'fee_type'
+
         
 class Fee(BaseModel):
     amount = models.IntegerField()
@@ -18,6 +19,7 @@ class Fee(BaseModel):
     class Meta:
         managed = False
         db_table = 'fee'
+        
         
 class Loyalty(BaseModel):
     amount_points = models.IntegerField(db_comment='La cantidad de dinero que da 1 un punto')

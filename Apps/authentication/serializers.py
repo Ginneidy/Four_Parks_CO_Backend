@@ -1,13 +1,17 @@
 from rest_framework import serializers
-from .models import Role,User
-
+from .models import User
+from .models import Role
 
 class RoleSerializer(serializers.ModelSerializer):
-   class Meta:
-      model = Role
-      fields = '__all__'
-      
+    class Meta:
+        model = Role
+        fields = ["description"]
+
+
 class UserSerializer(serializers.ModelSerializer):
-   class Meta:
-      model = User
-      fields = ['user_name','last_name','email_address','document_type','user_document','role']
+    role = RoleSerializer(many=True, read_only=True) 
+
+    class Meta:
+        model = User
+        fields = "__all__"
+        

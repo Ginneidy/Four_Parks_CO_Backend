@@ -10,3 +10,36 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
+
+CORS_ALLOWED_ORIGINS = [
+
+    "http://localhost:3000",
+
+]
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+# Send email
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "fourparksdsp@gmail.com"
+EMAIL_HOST_PASSWORD = "ihyb omyz fkwa fjbw"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
