@@ -36,3 +36,5 @@ class Points(BaseModel):
     class Meta:
         managed = False
         db_table = 'points'
+
+

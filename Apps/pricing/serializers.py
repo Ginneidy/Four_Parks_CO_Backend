@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from .models import Loyalty, Fee
-from Apps.vehicle.serializers import VehicleTypeSerializer
-
+from .models import Loyalty, Fee, Points
 
 class FeeTypeSerializer(serializers.ModelSerializer):
     class Meta:

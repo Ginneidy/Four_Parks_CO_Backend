@@ -4,69 +4,64 @@ import string
 import re
 
 from datetime import datetime
-from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import transaction
-from django.contrib.auth.hashers import check_password
 
 from .models import User, Role
 from .serializers import UserSerializer
 from rest_framework.decorators import action
 
-
+# Function to send activation email
 def send_activation_mail(email, activation_code):
-    subject = "Activación usuario Four Parks"
+    subject = "User Activation Four Parks"
     message = (
-        f"¡Gracias por registrarte! este es tu codigo de activación: {activation_code}"
+        f"Thank you for signing up! This is your activation code: {activation_code}"
     )
     send_mail(
-        subject, message, "settings.EMAIL_HOST_USER", [email], fail_silently=False
+        subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False
     )
 
-
+# ViewSet for User operations
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    A simple viewset for users
-    """
-
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    # Action to handle user login
     @action(detail=False, methods=["POST"])
     def login(self, request, *args, **kwargs):
         email_address = request.data.get("email_address")
         user_password = request.data.get("user_password")
 
-        # Encriptar la contraseña proporcionada por el usuario con MD5
+        # Encrypt the user-provided password with MD5
         user_password_md5 = hashlib.md5(user_password.encode()).hexdigest()
 
         user = User.objects.filter(email_address=email_address)
 
         if user.exists():
-            # Comprobar si la contraseña proporcionada coincide con la almacenada en la base de datos
+            # Check if the provided password matches the one stored in the database
             if user_password_md5 == user.first().user_password:
                 userData = UserSerializer(user.first()).data
                 return Response(userData, status=status.HTTP_201_CREATED)
             else:
                 return Response(
-                    {"error": "La constraseña es incorrecta"},
+                    {"error": "Incorrect password"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         else:
             return Response(
-                {"error": "No existe un usuario con ese correo electronico"},
+                {"error": "No user exists with that email address"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+    # Action to handle user registration
     @action(detail=False, methods=["POST"])
     def register(self, request):
         data = request.data
 
-        # Validación de campos obligatorios
+        # Validation of required fields
         required_fields = [
             "user_name",
             "last_name",
@@ -82,7 +77,7 @@ class UserViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Validación del nombre y apellido
+        # Validation of name and last name
         name_regex = r"^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
         if not re.match(name_regex, data.get("user_name")):
             return Response(
@@ -93,14 +88,14 @@ class UserViewSet(viewsets.ModelViewSet):
                 {"error": "Invalid last name"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validación del email
+        # Validation of email
         email = data.get("email_address")
         if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email):
             return Response(
                 {"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Validación del número de identificación y tipo de identificación
+        # Validation of document type and number
         document_type = data.get("document_type")
         user_document = data.get("user_document")
         if document_type not in ["CC", "DNI", "Passport"]:
@@ -112,7 +107,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 {"error": "Invalid document number"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # validación de la contraseña
+        # Validation of password
         password = data.get("user_password")
 
         if not password:
@@ -126,20 +121,20 @@ class UserViewSet(viewsets.ModelViewSet):
         ):
             return Response(
                 {
-                    "error": "The password must contain at least one number, one uppercase letter and one lowercase letter"
+                    "error": "The password must contain at least one number, one uppercase letter, and one lowercase letter"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # cifrado de la contraseña
+        # Encrypting the password
         hashed_password = hashlib.md5(password.encode()).hexdigest()
 
-        # codigo de activación
+        # Activation code generation
         activation_code = "".join(
             random.choices(string.ascii_letters + string.digits, k=5)
         )
-        # 37cc732827b274ea8604f343517a79fc
-        # creación del usuario
+
+        # User creation
         created_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S %z")
 
         with transaction.atomic():
@@ -159,14 +154,14 @@ class UserViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 user = serializer.save()
 
-                # Asignar el rol
+                # Assigning the role
                 role_id = int(
                     data.get("role", 1)
-                )  # Si el valor no está presente, se asigna 1 como valor predeterminado
+                )  # If the value is not present, 1 is assigned as the default value
                 role = Role.objects.get(pk=role_id)
                 user.role.add(role)
 
-                # Enviar correo electrónico de activación
+                # Sending activation email
                 send_activation_mail(user.email_address, activation_code)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
