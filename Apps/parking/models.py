@@ -2,8 +2,7 @@ from django.db import models
 from Apps.authentication.models import User
 from Apps.pricing.models import Fee
 from Apps.pricing.models import Loyalty
-
-
+from datetime import datetime
 from Apps.baseModel import BaseModel
 
 class ParkingType(BaseModel):
@@ -22,8 +21,8 @@ class City(BaseModel):
 
 class Schedule(BaseModel):
     week_day = models.IntegerField()
-    opening_time = models.DateTimeField()
-    closing_time = models.DateTimeField()
+    opening_time = models.TimeField()
+    closing_time = models.TimeField()
 
     class Meta:
         managed = False

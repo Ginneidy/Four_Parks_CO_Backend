@@ -13,7 +13,7 @@ from django.db import transaction
 from .models import User, Role
 from .serializers import UserSerializer
 from rest_framework.decorators import action
-
+from Apps.baseViewSet import BaseViewSet
 
 # Function to send activation email
 def send_activation_mail(email, activation_code):
@@ -33,7 +33,7 @@ def is_valid_email(email):
 
 
 # ViewSet for User operations
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(BaseViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -180,7 +180,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     # Action to verify user account
     # /api/auth/users/verify_account/
-    @action(detail=False, methods=["POST"])
+    @action(detail=False, methods=["PUT"])
     def verify_account(self, request):
         user_id = request.data.get("id")
         user_token = request.data.get("user_token")
