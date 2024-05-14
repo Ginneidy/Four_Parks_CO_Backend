@@ -8,6 +8,7 @@ class BaseViewSet(viewsets.ModelViewSet):
     queryset = None
     serializer_class = None
 
+    # [GET]
     def create(self, request, *args, **kwargs):
         """
         Create a new instance.
@@ -25,10 +26,11 @@ class BaseViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(
-                    {"error": "Invalid data provided"},
+                    {"error": "Datos no válidos proporcionados"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+    # [PUT]
     def update(self, request, *args, **kwargs):
         """
         Update an existing instance.
@@ -47,10 +49,11 @@ class BaseViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(
-                    {"error": "Invalid data provided"},
+                    {"error": "Datos no válidos proporcionados"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+    # [DELETE]
     def destroy(self, request, *args, **kwargs):
         """
         Soft delete an existing instance.
@@ -63,6 +66,6 @@ class BaseViewSet(viewsets.ModelViewSet):
         instance.deleted_date = get_current_datetime()
         instance.save()
         return Response(
-            {"message": f"{self.queryset.model.__name__} deleted successfully"},
+            {"message": f"{self.queryset.model.__name__} borrado exitosamente"},
             status=status.HTTP_204_NO_CONTENT,
         )

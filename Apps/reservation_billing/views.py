@@ -1,195 +1,75 @@
-from rest_framework import viewsets
-from Apps.reservation_billing.models import Booking,PaymentMethod,Bill,CreditCard
-from Apps.vehicle.models import Vehicle
-from Apps.reservation_billing.serializers import BookingSerializer,PaymentMethodSerializer,BillSerializer,CreditCardSerializer
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework import permissions
+from django.db import transaction
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
+from Apps.reservation_billing.models import Booking, PaymentMethod, Bill, CreditCard
+from Apps.reservation_billing.serializers import (
+    BookingSerializer,
+    PaymentMethodSerializer,
+    BillSerializer,
+    CreditCardSerializer,
+)
+from Apps.baseViewSet import BaseViewSet
+from Apps.authentication.models import User
+
+from helpers.helpers import get_current_datetime, validate_credit_card
 
 
-class BookingViewSet(viewsets.ModelViewSet):
-    #permission_classes = [permissions.IsAuthenticated]
+class BookingViewSet(BaseViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
-    def get_Booking(self, booking_id):
-        try:
-            return Booking.objects.get(id=booking_id)
-        except Booking.DoesNotExist:
-            return None
 
-    def get(self, request, booking_id, *args, **kwargs):
-        booking = self.get_Booking(booking_id)
-        if not booking:
-            return Response(
-                {"res": "La reserva no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        serializer = BookingSerializer(booking)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
-        booking = {
-            "check_in": request.data.get("check_in"),
-            "check_out": request.data.get("check_out"),
-            "client_id": request.data.get("client_id"),
-            "parking_id": request.data.get("parking_id"),
-            "vehicle_id": request.data.get("vehicle_id")
-            }
-        serializer = BookingSerializer(data=booking)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request, booking_id, *args, **kwargs):
-        booking = self.get_Booking(booking_id)
-        if not booking:
-            return Response(
-                {"res": "La reserva no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        booking = {
-            "check_in": request.data.get("check_in"),
-            "check_out": request.data.get("check_out"),
-            "client_id": request.data.get("client_id"),
-            "parking_id": request.data.get("parking_id"),
-            "vehicle_id": request.data.get("vehicle_id")
-            }
-        serializer = BookingSerializer(booking, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, resquest, booking_id, *args, **kwargs):
-        booking = self.get_Booking(booking_id)
-        if not booking:
-            return Response(
-                {"res": "La reserva no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        booking.delete()
-        return Response({"res": "Elemento eliminado"}, status=status.HTTP_200_OK)
-    
-class PaymentMethodViewSet(viewsets.ModelViewSet):
-    #permission_classes = [permissions.IsAuthenticated]
+class PaymentMethodViewSet(BaseViewSet):
     queryset = PaymentMethod.objects.all()
     serializer_class = PaymentMethodSerializer
-    def get_PaymentMethod(self, PaymentMethod_id):
-        try:
-            return PaymentMethod.objects.get(id=PaymentMethod_id)
-        except PaymentMethod.DoesNotExist:
-            return None
 
-    def get(self, request, PaymentMethod_id, *args, **kwargs):
-        PaymentMethod = self.get_PaymentMethod(PaymentMethod_id)
-        if not PaymentMethod:
-            return Response(
-                {"res": "El metodo de pago no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        serializer = PaymentMethodSerializer(PaymentMethod)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
-        PaymentMethod = {
-            "description": request.data.get("description")
-        }
-        serializer = PaymentMethodSerializer(data=PaymentMethod)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def put(self, request, PaymentMethod_id, *args, **kwargs):
-        PaymentMethod = self.get_PaymentMethod(PaymentMethod_id)
-        if not PaymentMethod:
-            return Response(
-                {"res": "El metodo de pago no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        PaymentMethod = {
-            "description": request.data.get("description")
-        }
-        serializer = PaymentMethodSerializer(PaymentMethod, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, resquest, PaymentMethod_id, *args, **kwargs):
-        PaymentMethod = self.get_PaymentMethod(PaymentMethod_id)
-        if not PaymentMethod:
-            return Response(
-                {"res": "El metodo de pago no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        PaymentMethod.delete()
-        return Response({"res": "Elemento eliminado"}, status=status.HTTP_200_OK)
-            
-class BillViewSet(viewsets.ModelViewSet):
-    #permission_classes = [permissions.IsAuthenticated]
+class BillViewSet(BaseViewSet):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
-    
-    def get_Bill(self, Bill_id):
-        try:
-            return Bill.objects.get(id=Bill_id)
-        except Bill.DoesNotExist:
-            return None
 
-    def get(self, request, Bill_id, *args, **kwargs):
-        Bill = self.get_Bill(Bill_id)
-        if not Bill:
-            return Response(
-                {"res": "La cuenta no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        serializer = BillSerializer(Bill)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        user = request.user
-        Bill = {
-            "code": request.data.get("code"),
-            "vehicle_entry": request.data.get("vehicle_entry"),
-            "vehicle_exit": request.data.get("vehicle_exit"),
-            "total_time": request.data.get("total_time"),
-            "points_used": request.data.get("points_used"),
-            "total_amount": request.data.get("total_amount"),
-            "booking_id": request.data.get("booking_id"),
-            "payment_method_id": request.data.get("payment_method_id")
-        }
-        serializer = BillSerializer(data=Bill)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def put(self, request, Bill_id, *args, **kwargs):
-        Bill = self.get_Bill(Bill_id)
-        if not Bill:
-            return Response(
-                {"res": "La cuenta no existe"}, status=status.HTTP_404_NOT_FOUND
-            )
-        Bill = {
-            "code": request.data.get("code"),
-            "vehicle_entry": request.data.get("vehicle_entry"),
-            "vehicle_exit": request.data.get("vehicle_exit"),
-            "total_time": request.data.get("total_time"),
-            "points_used": request.data.get("points_used"),
-            "total_amount": request.data.get("total_amount"),
-            "booking_id": request.data.get("booking_id"),
-            "payment_method_id": request.data.get("payment_method_id")
-        }
-        serializer = BillSerializer(Bill, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class CreditCardViewSet(BaseViewSet):
+    queryset = CreditCard.objects.all()
+    serializer_class = CreditCardSerializer
 
-    def delete(self, resquest, Bill_id, *args, **kwargs):
-        Bill = self.get_Bill(Bill_id)
-        if not Bill:
+    # [POST] api/reservation/creditCards/
+    def create(self, request, *args, **kwargs):
+        created_date = get_current_datetime()
+
+        with transaction.atomic():
+            serializer = self.serializer_class(data=request.data)
+
+            if serializer.is_valid():
+                if not validate_credit_card(request.data):
+                    return Response(
+                        {"message": "Tarjeta de Credito invalida"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                else:
+                    serializer.save(created_date=created_date)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    {"error": "Datos no válidos proporcionados"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+    # [GET] api/reservation/creditCards/{user_id}/user_credit_card/
+    @action(detail=True, methods=["GET"])
+    def user_credit_card(self, request, pk=None):
+        user = get_object_or_404(User, pk=pk)
+        credit_card = CreditCard.objects.filter(client=user).first()
+        if credit_card:
+            serializer = self.serializer_class(credit_card)
+            return Response(serializer.data)
+        else:
             return Response(
-                {"res": "La cuenta no existe"}, status=status.HTTP_404_NOT_FOUND
+                {
+                    "message": "No se encontró ninguna tarjeta de crédito para este usuario"
+                },
+                status=status.HTTP_404_NOT_FOUND,
             )
-        Bill.delete()
-        return Response({"res": "Elemento eliminado"}, status=status.HTTP_200_OK) 
-            

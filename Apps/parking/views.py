@@ -26,6 +26,7 @@ class ParkingViewSet(BaseViewSet):
     queryset = Parking.objects.all()
     serializer_class = ParkingSerializer
 
+    # [GET] api/parking/parkings/
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
@@ -36,7 +37,8 @@ class ParkingViewSet(BaseViewSet):
         )
         data["available_capacity"] = available_capacity
         return Response(data)
-
+    
+    
 
 class ParkingTypeViewSet(BaseViewSet):
     queryset = ParkingType.objects.all()

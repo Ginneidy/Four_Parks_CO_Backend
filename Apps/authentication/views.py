@@ -15,6 +15,7 @@ from .serializers import UserSerializer
 from rest_framework.decorators import action
 from Apps.baseViewSet import BaseViewSet
 
+
 # Function to send activation email
 def send_activation_mail(email, activation_code):
     subject = "User Activation Four Parks"
@@ -23,9 +24,11 @@ def send_activation_mail(email, activation_code):
     )
     send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
 
+
 # Function for user password hashing
 def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()
+
 
 # Function for validating email
 def is_valid_email(email):
@@ -56,12 +59,14 @@ class UserViewSet(BaseViewSet):
                 return Response(userData, status=status.HTTP_201_CREATED)
             else:
                 return Response(
-                    {"error": "Incorrect password"},
+                    {"error": "Contraseña incorrecta"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         else:
             return Response(
-                {"error": "No user exists with that email address"},
+                {
+                    "error": "No existe ningún usuario con esa dirección de correo electrónico"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -91,18 +96,20 @@ class UserViewSet(BaseViewSet):
         name_regex = r"^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
         if not re.match(name_regex, data.get("user_name")):
             return Response(
-                {"error": "Invalid user name"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Nombre de usuario no válido"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         if not re.match(name_regex, data.get("last_name")):
             return Response(
-                {"error": "Invalid last name"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Apellido invalido"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         # Validation of email
         email = data.get("email_address")
         if not is_valid_email(email):
             return Response(
-                {"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Dirección de correo electrónico no válida"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Validation of document type and number
@@ -110,11 +117,13 @@ class UserViewSet(BaseViewSet):
         user_document = data.get("user_document")
         if document_type not in ["CC", "DNI", "Passport"]:
             return Response(
-                {"error": "Invalid document type"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Tipo de documento no válido"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         if not re.match(r"^[0-9]+$", user_document):
             return Response(
-                {"error": "Invalid document number"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "Número de documento no válido"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Validation of password
@@ -122,7 +131,7 @@ class UserViewSet(BaseViewSet):
 
         if not password:
             return Response(
-                {"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "se requiere contraseña"}, status=status.HTTP_400_BAD_REQUEST
             )
         if not (
             any(char.isdigit() for char in password)
@@ -131,7 +140,7 @@ class UserViewSet(BaseViewSet):
         ):
             return Response(
                 {
-                    "error": "The password must contain at least one number, one uppercase letter, and one lowercase letter"
+                    "error": "La contraseña debe contener al menos un número, una letra mayúscula y una letra minúscula."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -177,7 +186,6 @@ class UserViewSet(BaseViewSet):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     # Action to verify user account
     # /api/auth/users/verify_account/
     @action(detail=False, methods=["PUT"])
@@ -191,11 +199,11 @@ class UserViewSet(BaseViewSet):
                 user.user_token = None
                 user.save()
                 return Response(
-                    "Successfully verified account", status=status.HTTP_200_OK
+                    "Cuenta verificada exitosamente", status=status.HTTP_200_OK
                 )
             else:
                 return Response(
-                    "Invalid activation code", status=status.HTTP_400_BAD_REQUEST
+                    "código de activación inválido", status=status.HTTP_400_BAD_REQUEST
                 )
         except User.DoesNotExist:
-            return Response("User does not exist", status=status.HTTP_404_NOT_FOUND)
+            return Response("El usuario no existe", status=status.HTTP_404_NOT_FOUND)

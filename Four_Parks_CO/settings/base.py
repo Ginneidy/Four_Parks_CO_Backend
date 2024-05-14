@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     "coreapi",
     
     #Internal Apps
-    "API",
     "Apps.authentication",
     "Apps.parking",
     "Apps.pricing",
