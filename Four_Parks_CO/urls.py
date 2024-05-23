@@ -8,4 +8,6 @@ urlpatterns = [
     path("api/auth/", include("Apps.authentication.urls")),
     path("api/parking/", include("Apps.parking.urls")),
     path("api/reservation/", include("Apps.reservation_billing.urls")),
+    path("api/pricing/", include("Apps.pricing.urls")),
+    path("api/vehicle/", include("Apps.vehicle.urls")),
 ]

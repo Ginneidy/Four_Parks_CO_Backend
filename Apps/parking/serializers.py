@@ -5,6 +5,7 @@ from Apps.pricing.serializers import LoyaltySerializer, FeeSerializer
 from Apps.reservation_billing.models import Booking
 from datetime import datetime
 
+
 class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
@@ -14,7 +15,7 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class ParkingTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParkingType
-        fields = "__all__"
+        fields = ["id", "description"]
 
 
 class CitySerializer(serializers.ModelSerializer):

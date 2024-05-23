@@ -1,3 +1,10 @@
 from django.shortcuts import render
 
-# Create your views here.
+from Apps.baseViewSet import BaseViewSet
+from .models import VehicleType
+from .serializers import VehicleTypeSerializer
+
+
+class VehicleTypeViewSet(BaseViewSet):
+    queryset = VehicleType.objects.all()
+    serializer_class = VehicleTypeSerializer

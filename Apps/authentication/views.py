@@ -15,6 +15,8 @@ from .serializers import UserSerializer
 from rest_framework.decorators import action
 from Apps.baseViewSet import BaseViewSet
 
+from helpers.helpers import validate_full_name
+
 
 # Function to send activation email
 def send_activation_mail(email, activation_code):
@@ -92,16 +94,10 @@ class UserViewSet(BaseViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Validation of name and last name
-        name_regex = r"^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
-        if not re.match(name_regex, data.get("user_name")):
-            return Response(
-                {"error": "Nombre de usuario no válido"},
+        if not validate_full_name(data):
+            Response(
+                {"error": "Nombre de usuario o apellido no válido"},
                 status=status.HTTP_400_BAD_REQUEST,
-            )
-        if not re.match(name_regex, data.get("last_name")):
-            return Response(
-                {"error": "Apellido invalido"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         # Validation of email
@@ -115,6 +111,7 @@ class UserViewSet(BaseViewSet):
         # Validation of document type and number
         document_type = data.get("document_type")
         user_document = data.get("user_document")
+        
         if document_type not in ["CC", "DNI", "Passport"]:
             return Response(
                 {"error": "Tipo de documento no válido"},
@@ -186,13 +183,33 @@ class UserViewSet(BaseViewSet):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    # Action to create an admin user, haciendose
+    @action(detail=False, methods=["POST"])
+    def create_admin(self, request):
+        data = request.data
+
+        required_fields = {
+            "user_name",
+            "last_name",
+            "email_address",
+            "document_type",
+            "user_document",
+        }
+
+        for field in required_fields:
+            if not data.get(field):
+                return Response(
+                    {"error": f"{field.replace('_',' ').capitalize()} is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
     # Action to verify user account
     # /api/auth/users/verify_account/
     @action(detail=False, methods=["PUT"])
     def verify_account(self, request):
         user_id = request.data.get("id")
         user_token = request.data.get("user_token")
-
+        # atomic
         try:
             user = User.objects.get(id=user_id)
             if user.user_token == user_token:

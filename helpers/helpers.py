@@ -1,3 +1,5 @@
+import re
+
 from datetime import datetime
 
 
@@ -30,3 +32,13 @@ def validate_credit_card(data):
         return False
 
     return True
+
+
+def validate_full_name(data):
+    # Validation of name and last name
+    name_regex = r"^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
+    if not (
+        re.match(name_regex, data.get("user_name"))
+        or (re.match(name_regex, data.get("last_name")))
+    ):
+        return False
