@@ -21,7 +21,7 @@ class ParkingTypeSerializer(serializers.ModelSerializer):
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
         model = City
-        fields = ["city_name"]
+        fields = ["id", "city_name"]
 
 
 class ParkingSerializer(serializers.ModelSerializer):
