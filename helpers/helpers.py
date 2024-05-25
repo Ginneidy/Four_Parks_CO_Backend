@@ -1,13 +1,17 @@
 import re
+import random
+import string
 
 from datetime import datetime
 
 
+# Function for getting the current date and time
 def get_current_datetime():
     """Get the current date and time."""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S %z")
 
 
+# Function for validating credit card
 def validate_credit_card(data):
     # Perform credit card validations here
     card_number = data.get("card_number")
@@ -37,8 +41,19 @@ def validate_credit_card(data):
 def validate_full_name(data):
     # Validation of name and last name
     name_regex = r"^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+)*$"
+    print(data.get("last_name"))
     if not (
         re.match(name_regex, data.get("user_name"))
-        or (re.match(name_regex, data.get("last_name")))
+        and re.match(name_regex, data.get("last_name"))
     ):
         return False
+    return True
+
+
+# Function for validating email
+def validate_email(email):
+    return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email)
+
+
+def get_random_string(length):
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))

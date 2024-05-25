@@ -4,37 +4,22 @@ import string
 import re
 
 from datetime import datetime
-from rest_framework import viewsets, status
+from rest_framework import status
 from rest_framework.response import Response
-from django.core.mail import send_mail
-from django.conf import settings
+from rest_framework.decorators import action
 from django.db import transaction
 
 from .models import User, Role
 from .serializers import UserSerializer
-from rest_framework.decorators import action
 from Apps.baseViewSet import BaseViewSet
 
-from helpers.helpers import validate_full_name
-
-
-# Function to send activation email
-def send_activation_mail(email, activation_code):
-    subject = "User Activation Four Parks"
-    message = (
-        f"Gracias por registrarte! Este es tu código de activación: {activation_code}"
-    )
-    send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+from helpers.helpers import validate_full_name, validate_email
+from helpers.emailHelpers import send_activation_mail
 
 
 # Function for user password hashing
 def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()
-
-
-# Function for validating email
-def is_valid_email(email):
-    return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email)
 
 
 # ViewSet for User operations
@@ -102,7 +87,7 @@ class UserViewSet(BaseViewSet):
 
         # Validation of email
         email = data.get("email_address")
-        if not is_valid_email(email):
+        if not validate_email(email):
             return Response(
                 {"error": "Dirección de correo electrónico no válida"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -111,7 +96,7 @@ class UserViewSet(BaseViewSet):
         # Validation of document type and number
         document_type = data.get("document_type")
         user_document = data.get("user_document")
-        
+
         if document_type not in ["CC", "DNI", "Passport"]:
             return Response(
                 {"error": "Tipo de documento no válido"},

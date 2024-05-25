@@ -5,7 +5,8 @@ import os
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR_STR = Path(__file__).resolve().parent
+print(f"BASE_DIR_STR: {os.path.join(BASE_DIR, "templates")}")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -20,19 +21,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
-    #External Packages
+    # External Packages
     "rest_framework",
     "coreapi",
-    
-    #Internal Apps
+    # Internal Apps
     "Apps.authentication",
     "Apps.parking",
     "Apps.pricing",
     "Apps.reservation_billing",
     "Apps.vehicle",
-
-    #corsheader
+    # corsheader
     "corsheaders",
 ]
 
@@ -52,7 +50,9 @@ ROOT_URLCONF = "Four_Parks_CO.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            os.path.join(BASE_DIR, "templates")
+        ],  # Agrega el directorio de plantillas aquí
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -64,6 +64,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = "Four_Parks_CO.wsgi.application"
 
@@ -112,5 +113,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
-
-
