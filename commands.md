@@ -1,6 +1,7 @@
 # Packages
 
-
+python manage.py makemigrations
+pyrhon mange.py migrate
 
 # Commands
 
