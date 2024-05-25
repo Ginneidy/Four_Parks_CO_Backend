@@ -1,7 +1,5 @@
-import hashlib
 import random
 import string
-import re
 
 from datetime import datetime
 from rest_framework import status
@@ -13,13 +11,9 @@ from .models import User, Role
 from .serializers import UserSerializer
 from Apps.baseViewSet import BaseViewSet
 
-from helpers.helpers import validate_full_name, validate_email
-from helpers.emailHelpers import send_activation_mail
-
-
-# Function for user password hashing
-def hash_password(password):
-    return hashlib.md5(password.encode()).hexdigest()
+from helpers.validate_helpers import validate_user_data
+from helpers.email_helpers import send_activation_mail
+from helpers.password_helpers import hash_password
 
 
 # ViewSet for User operations
@@ -63,50 +57,19 @@ class UserViewSet(BaseViewSet):
     def register(self, request):
         data = request.data
 
-        # Validation of required fields
-        required_fields = [
-            "user_name",
-            "last_name",
-            "email_address",
-            "user_document",
-            "document_type",
-            "user_password",
-        ]
-        for field in required_fields:
-            if not data.get(field):
-                return Response(
-                    {"error": f"{field.replace('_', ' ').capitalize()} is required"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        if not validate_full_name(data):
-            Response(
-                {"error": "Nombre de usuario o apellido no válido"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Validation of email
-        email = data.get("email_address")
-        if not validate_email(email):
-            return Response(
-                {"error": "Dirección de correo electrónico no válida"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Validation of document type and number
-        document_type = data.get("document_type")
-        user_document = data.get("user_document")
-
-        if document_type not in ["CC", "DNI", "Passport"]:
-            return Response(
-                {"error": "Tipo de documento no válido"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if not re.match(r"^[0-9]+$", user_document):
-            return Response(
-                {"error": "Número de documento no válido"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        validation_error = validate_user_data(
+            data,
+            [
+                "user_name",
+                "last_name",
+                "email_address",
+                "user_document",
+                "document_type",
+                "user_password",
+            ],
+        )
+        if validation_error:
+            return validation_error
 
         # Validation of password
         password = data.get("user_password")
@@ -167,26 +130,6 @@ class UserViewSet(BaseViewSet):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Action to create an admin user, haciendose
-    @action(detail=False, methods=["POST"])
-    def create_admin(self, request):
-        data = request.data
-
-        required_fields = {
-            "user_name",
-            "last_name",
-            "email_address",
-            "document_type",
-            "user_document",
-        }
-
-        for field in required_fields:
-            if not data.get(field):
-                return Response(
-                    {"error": f"{field.replace('_',' ').capitalize()} is required"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
 
     # Action to verify user account
     # /api/auth/users/verify_account/

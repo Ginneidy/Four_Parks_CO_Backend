@@ -62,7 +62,7 @@ VALUES
     ('uad 762', 1, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('sbs 406', 2, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('wgz 668', 1, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
-    ('rgo 641', 2, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL);
+    ('rgo 641', 2, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('bici', 2, CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL);
 
 -- Insertar datos en la tabla "fee_type"
