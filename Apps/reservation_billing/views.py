@@ -52,10 +52,10 @@ class BookingViewSet(BaseViewSet):
         credit_card = get_object_or_404(CreditCard, client=user)
         booking = get_object_or_404(Booking, id=serializer.data.get("id"))
 
-        send_mail_confirmation_reservation(user, parking, serializer.data)
+        # send_mail_confirmation_reservation(user, parking, serializer.data)
 
-        # TODO: Implementar la fidelización
-        send_payment_confirmation_mail(user, credit_card, booking)
+        # # TODO: Implementar la fidelización
+        # send_payment_confirmation_mail(user, credit_card, booking)
 
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
