@@ -36,7 +36,7 @@ INSERT INTO vehicle_type (description, created_date, deleted_date)
 VALUES
     ('carro', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('moto', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
-    ('bicileta', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL);
+    ('Bicicleta', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL);
 
 -- Insertar datos en la tabla "vehicle"
 DELETE FROM vehicle;
@@ -72,7 +72,7 @@ INSERT INTO fee_type (description, created_date, deleted_date)
 VALUES
     ('hora', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('minuto', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
-    ('dia', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
+    ('día', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL),
     ('reserva', CURRENT_TIMESTAMP AT TIME ZONE 'America/Bogota', NULL);
 
 -- Insertar datos en la tabla "fee"

@@ -8,7 +8,7 @@ pyrhon mange.py migrate
 python manage.py runserver
 
 pip freeze >requiriments.txt
-
+ 
 
 billing
     Bill

@@ -1,13 +1,18 @@
-import re
+from datetime import datetime, timedelta
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from django.db import transaction
 
-from Apps.parking.models import Parking, ParkingType, City, Schedule
-from Apps.pricing.models import Fee, Loyalty
+from django.db import transaction
+from django.http import FileResponse
+from django.db.models.functions import TruncHour
+from django.db.models import Count, Avg, Max, Min, DurationField, ExpressionWrapper, F
+
 from Apps.authentication.models import Role
+from Apps.pricing.models import Fee, Loyalty
+from Apps.reservation_billing.models import Booking
+from Apps.parking.models import Parking, ParkingType, City, Schedule
 from Apps.authentication.serializers import UserSerializer
 from .serializers import (
     ParkingSerializer,
@@ -22,6 +27,7 @@ from helpers.validate_helpers import validate_user_data
 from helpers.email_helpers import send_admin_password
 from helpers.location_helpers import generate_random_coordinates
 from helpers.password_helpers import hash_password
+from helpers.PDF.parking_usage import generate_parking_usage_pdf
 
 
 # api/parking/schedules
@@ -34,6 +40,99 @@ class ScheduleViewSet(BaseViewSet):
 class ParkingViewSet(BaseViewSet):
     queryset = Parking.objects.all()
     serializer_class = ParkingSerializer
+
+    # [POST] api/parking/parkings/parking_usage_report/
+    @action(detail=False, methods=["POST"])
+    def parking_usage_report(self, request):
+        parking_id = request.data.get("parking_id")
+        start_date = request.data.get("start_date")
+        end_date = request.data.get("end_date")
+
+        if not start_date or not end_date:
+            return Response(
+                {"error": "Both start_date and end_date are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            start_date = datetime.strptime(start_date, "%Y-%m-%d")
+            end_date = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(
+                days=1
+            )  # Include the entire end_date
+        except ValueError:
+            return Response(
+                {"error": "Invalid date format. Use YYYY-MM-DD"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Número de Reservas
+        total_reservas = Booking.objects.filter(
+            parking_id=parking_id, check_in__range=(start_date, end_date)
+        ).count()
+
+        # Tiempo Promedio de Ocupación
+        bookings = Booking.objects.filter(
+            parking_id=parking_id, check_in__range=(start_date, end_date)
+        )
+        average_occupation_time = bookings.annotate(
+            duration=ExpressionWrapper(
+                F("check_out") - F("check_in"), output_field=DurationField()
+            )
+        ).aggregate(Avg("duration"))["duration__avg"]
+
+        # Ocupación Máxima y Mínima
+        hourly_occupations = (
+            Booking.objects.filter(
+                parking_id=parking_id, check_in__range=(start_date, end_date)
+            )
+            .annotate(hour=TruncHour("check_in"))
+            .values("hour")
+            .annotate(occupation=Count("id"))
+        )
+
+        if hourly_occupations.exists():
+            ocupacion_maxima = hourly_occupations.aggregate(Max("occupation"))[
+                "occupation__max"
+            ]
+            ocupacion_minima = hourly_occupations.aggregate(Min("occupation"))[
+                "occupation__min"
+            ]
+        else:
+            ocupacion_maxima = 0
+            ocupacion_minima = 0
+
+        # Detalle de cada reserva
+        bookings_details = bookings.annotate(
+            date=F("check_in__date"),
+            duration=ExpressionWrapper(
+                F("check_out") - F("check_in"), output_field=DurationField()
+            ),
+        ).values("date", "check_in", "check_out", "duration")
+
+        report_data = {
+            "parking_name": Parking.objects.get(id=parking_id).park_name,
+            "start_date": start_date.date(),
+            "end_date": (end_date - timedelta(days=1)).date(),
+            "total_reservas": total_reservas,
+            "average_occupation_time": average_occupation_time,
+            "ocupacion_maxima": ocupacion_maxima,
+            "ocupacion_minima": ocupacion_minima,
+            "bookings": bookings_details,
+        }
+
+        pdf_path = generate_parking_usage_pdf(report_data)
+        if not pdf_path:
+            return Response(
+                {"error": "Error generating PDF"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return FileResponse(
+            open(pdf_path, "rb"),
+            content_type="application/pdf",
+            as_attachment=True,
+            filename=f"reporte_parqueadero_{start_date.date()}_a_{(end_date - timedelta(days=1)).date()}.pdf",
+        )
 
     # [POST] api/parking/parkings/
     def create(self, request, *args, **kwargs):
@@ -155,7 +254,7 @@ class ParkingViewSet(BaseViewSet):
         Returns:
             None
         """
-        # Create loyalty model if loyalty data is provided
+        # Crear modelo de lealtad si se proporcionan datos de lealtad
         if data.get("loyalty"):
             parking.loyalty = Loyalty.objects.create(
                 amount_points=data["loyalty"].get("amount_points"),
@@ -163,7 +262,7 @@ class ParkingViewSet(BaseViewSet):
                 created_date=created_date,
             )
 
-        # Create schedule models for each schedule data provided
+        # Crear modelos de horario para cada dato de horario proporcionado
         for schedule_data in data.get("schedule", []):
             schedule = Schedule.objects.create(
                 week_day=schedule_data.get("week_day"),
@@ -173,15 +272,50 @@ class ParkingViewSet(BaseViewSet):
             )
             parking.schedule.add(schedule)
 
-        # Create fee models for each fee data provided
+        # IDs de tarifas predeterminadas
+        default_fees = {
+            (1, 1): 1,
+            (2, 1): 2,
+            (3, 1): 3,
+            (4, 1): 4,
+            (1, 2): 5,
+            (2, 2): 6,
+            (3, 2): 7,
+            (4, 2): 8,
+            (1, 3): 9,
+            (2, 3): 10,
+            (3, 3): 11,
+            (4, 3): 12,
+        }
+
+        # Crear un conjunto para verificar tarifas proporcionadas
+        provided_fees = set(
+            (fee["fee_type"], fee["vehicle_type"]) for fee in data.get("fee", [])
+        )
+
+        # Asignar tarifas proporcionadas o crear nuevas si no existen
         for fee_data in data.get("fee", []):
-            fee = Fee.objects.create(
-                fee_type_id=fee_data.get("fee_type"),
-                vehicle_type_id=fee_data.get("vehicle_type"),
-                amount=fee_data.get("amount"),
-                created_date=created_date,
+            fee_queryset = Fee.objects.filter(
+                fee_type_id=fee_data["fee_type"],
+                vehicle_type_id=fee_data["vehicle_type"],
+                amount=fee_data["amount"],
             )
+            if fee_queryset.exists():
+                fee = fee_queryset.first()  # Asignar la primera tarifa encontrada
+            else:
+                fee = Fee.objects.create(
+                    fee_type_id=fee_data["fee_type"],
+                    vehicle_type_id=fee_data["vehicle_type"],
+                    amount=fee_data["amount"],
+                    created_date=created_date,
+                )
             parking.fee.add(fee)
+
+        # Asignar tarifas predeterminadas si no se proporcionaron
+        for key, fee_id in default_fees.items():
+            if key not in provided_fees:
+                fee = Fee.objects.get(id=fee_id)
+                parking.fee.add(fee)
 
         parking.save()
 

@@ -6,7 +6,7 @@ from .models import Parking, City, ParkingType, Schedule
 from Apps.pricing.models import FeeType
 
 from Apps.authentication.serializers import UserSerializer
-from Apps.pricing.serializers import LoyaltySerializer
+from Apps.pricing.serializers import LoyaltySerializer, FeeSerializer
 from Apps.reservation_billing.models import Booking
 
 
@@ -33,6 +33,7 @@ class ParkingSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.city_name")
     parking_type = serializers.CharField(source="parking_type.description")
     loyalty = LoyaltySerializer(allow_null=True)
+    fee = FeeSerializer(many=True, read_only=True)
     available_capacity = serializers.SerializerMethodField()  # Campo calculado
     opening_time = serializers.SerializerMethodField()
     closing_time = serializers.SerializerMethodField()

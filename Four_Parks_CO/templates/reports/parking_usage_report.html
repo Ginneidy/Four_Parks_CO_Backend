@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Uso del Parqueadero</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 40px;
+        }
+
+        .report-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .report-header,
+        .summary,
+        table {
+            margin-bottom: 20px;
+        }
+
+        .report-header p,
+        .summary p {
+            margin: 5px 0;
+        }
+
+        .summary {
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        td {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="report-container">
+        <h1>Reporte de Uso del Parqueadero</h1>
+        <div class="report-header">
+            <p><strong>Nombre del Parqueadero:</strong> {{ report.parking_name }}</p>
+            <p><strong>Fecha del Reporte:</strong> {{ report.start_date }} a {{ report.end_date }}</p>
+        </div>
+        <div class="summary">
+            <p><strong>Total de Reservas:</strong> {{ report.total_reservas }}</p>
+            <p><strong>Tiempo Promedio de Ocupación:</strong> {{ report.average_occupation_time }} horas</p>
+            <p><strong>Ocupación Máxima:</strong> {{ report.ocupacion_maxima }}</p>
+            <p><strong>Ocupación Mínima:</strong> {{ report.ocupacion_minima }}</p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Hora de Entrada</th>
+                    <th>Hora de Salida</th>
+                    <th>Duración (Horas)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in report.bookings %}
+                <tr>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.check_in }}</td>
+                    <td>{{ booking.check_out }}</td>
+                    <td>{{ booking.duration }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

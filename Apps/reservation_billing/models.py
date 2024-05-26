@@ -14,6 +14,33 @@ class Booking(BaseModel):
     vehicle = models.ForeignKey(Vehicle, models.DO_NOTHING)
     check_out = models.DateTimeField()
 
+    @property
+    def total_amount(self):
+        vehicle_type = self.vehicle.vehicle_type
+        parking = self.parking
+        fees = parking.fee.filter(vehicle_type=vehicle_type)
+
+        # Obtenemos las tarifas
+        hourly_fee = fees.get(fee_type__description="hora").amount
+        daily_fee = fees.get(fee_type__description="dia").amount
+        minute_fee = fees.get(fee_type__description="minuto").amount
+        reservation_fee = fees.get(fee_type__description="reserva").amount
+
+        duration = self.check_out - self.check_in
+
+        # Cálculo del total
+        total = reservation_fee
+
+        if duration.days > 0:
+            total += duration.days * daily_fee
+
+        remaining_seconds = duration.seconds
+        total += (remaining_seconds // 3600) * hourly_fee
+        remaining_seconds %= 3600
+        total += (remaining_seconds // 60) * minute_fee
+
+        return total
+
     class Meta:
         managed = False
         db_table = "booking"
