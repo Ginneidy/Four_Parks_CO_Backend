@@ -9,7 +9,7 @@ from rest_framework import permissions
 
 
 class CityViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+   
     queryset = City.objects.all()
     serializer_class = CitySerializer
     def get_City(self, city_id):

@@ -9,7 +9,7 @@ from rest_framework import permissions
 
 
 class BookingViewSet(viewsets.ModelViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     def get_Booking(self, booking_id):
