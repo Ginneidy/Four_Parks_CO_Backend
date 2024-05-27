@@ -34,7 +34,7 @@ SECRET_KEY = "django-insecure-wt%iqa+p@f80635m!!6u+b)%35hakus$g0krwl1fywpd0njqq6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['backnew-1226897588-choreo-internal.dp-development-fourparksco-39502-2393480315']
 
 
 # Application definition
