@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmación de Pago</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333333;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        p {
+            color: #666666;
+            line-height: 1.5;
+        }
+
+        .details,
+        .breakdown {
+            margin: 20px 0;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        li strong {
+            color: #333333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Confirmación de Pago</h1>
+        <p>Hola {{ user_name }},</p>
+        <p>Te confirmamos que el pago de tu reserva se ha realizado con éxito.</p>
+        <div class="details">
+            <h2>Detalles del Pago:</h2>
+            <ul>
+                <li><strong>Reserva ID:</strong> {{ booking_id }}</li>
+                <li><strong>Últimos 4 dígitos de la tarjeta:</strong> {{ card_last_digits }}</li>
+                <li><strong>Fecha del Pago:</strong> {{ payment_date }}</li>
+                <li><strong>Monto Total:</strong> ${{ total }}</li>
+            </ul>
+        </div>
+        <div class="breakdown">
+            <h2>Desglose del Pago:</h2>
+            <ul>
+                <li><strong>Tarifa de Reserva:</strong> ${{ reservation_fee }}</li>
+                <li><strong>Tarifa por Día:</strong> ${{ daily_fee }} x {{ total_days }} días</li>
+                <li><strong>Tarifa por Hora:</strong> ${{ hourly_fee }} x {{ total_hours }} horas</li>
+                <li><strong>Tarifa por Minuto:</strong> ${{ minute_fee }} x {{ total_minutes }} minutos</li>
+            </ul>
+        </div>
+        <p>Gracias por confiar en Four Parks.</p>
+        <p>Saludos,</p>
+        <p>El equipo de Four Parks</p>
+    </div>
+</body>
+
+</html>

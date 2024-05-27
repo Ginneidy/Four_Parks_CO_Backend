@@ -11,4 +11,4 @@ class VehicleTypeSerializer(serializers.ModelSerializer):
 class VehicleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vehicle
-        fields = ["id", "plate", "vehicle_type"]
+        fields = "__all__"
