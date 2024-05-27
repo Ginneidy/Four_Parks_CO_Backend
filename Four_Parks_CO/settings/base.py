@@ -6,11 +6,11 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR_STR = Path(__file__).resolve().parent
-print(f"BASE_DIR_STR: {os.path.join(BASE_DIR, "templates")}")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# False for production
+DEBUG = False
 
 # Application definition
 
