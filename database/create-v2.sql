@@ -711,7 +711,7 @@ ALTER TABLE public.user_role OWNER TO postgres;
 
 CREATE TABLE public.vehicle (
     id integer NOT NULL,
-    plate character varying(8) NOT NULL,
+    plate character varying(8),
     created_date timestamp without time zone NOT NULL,
     deleted_date timestamp without time zone,
     vehicle_type_id integer NOT NULL
@@ -1169,9 +1169,6 @@ ALTER TABLE ONLY public.vehicle
 -- TOC entry 3575 (class 2606 OID 16562)
 -- Name: vehicle vehicle_plate; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
-
-ALTER TABLE ONLY public.vehicle
-    ADD CONSTRAINT vehicle_plate UNIQUE (plate);
 
 
 --

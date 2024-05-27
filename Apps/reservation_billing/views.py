@@ -61,6 +61,14 @@ class BookingViewSet(BaseViewSet):
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
+    # [GET] api/reservation/bookings/{user_id}/user_bookings/
+    @action(detail=True, methods=["GET"])
+    def user_bookings(self, request, pk=None):
+        user = get_object_or_404(User, pk=pk)
+        bookings = Booking.objects.filter(user=user)
+        serializer = self.serializer_class(bookings, many=True)
+        return Response(serializer.data)
+
     # [POST] api/reservation/booking_total/
     @action(detail=False, methods=["POST"])
     def booking_total(self, request, *args, **kwargs):

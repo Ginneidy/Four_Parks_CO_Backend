@@ -9,7 +9,7 @@ from django.http import FileResponse
 from django.db.models.functions import TruncHour
 from django.db.models import Count, Avg, Max, Min, DurationField, ExpressionWrapper, F
 
-from Apps.authentication.models import Role
+from Apps.authentication.models import Role, User
 from Apps.pricing.models import Fee, Loyalty
 from Apps.reservation_billing.models import Booking
 from Apps.parking.models import Parking, ParkingType, City, Schedule
@@ -153,46 +153,57 @@ class ParkingViewSet(BaseViewSet):
         # Extract admin data from request
         admin_data = request.data.pop("admin")
         created_date = get_current_datetime()
-
-        # Validate admin data
-        validation_error = validate_user_data(
-            admin_data,
-            [
-                "user_name",
-                "last_name",
-                "email_address",
-                "document_type",
-                "user_document",
-            ],
-        )
-        if validation_error:
-            return validation_error
-
-        # Generate temporary password
-        temp_password = get_random_string(10)
-        hashed_password = hash_password(temp_password)
-
         with transaction.atomic():
-            # Create admin user
-            admin_serializer = UserSerializer(
-                data={
-                    "user_name": admin_data.get("user_name"),
-                    "last_name": admin_data.get("last_name"),
-                    "email_address": admin_data.get("email_address"),
-                    "user_password": hashed_password,
-                    "document_type": admin_data.get("document_type"),
-                    "user_document": admin_data.get("user_document"),
-                    "created_date": created_date,
-                }
-            )
 
-            if admin_serializer.is_valid():
-                admin = admin_serializer.save()
-                admin.role.add(Role.objects.get(pk=2))
+            if isinstance(admin_data, int):
+                # Fetch existing admin
+                try:
+                    admin = User.objects.get(pk=admin_data)
+                except User.DoesNotExist:
+                    return Response(
+                        {"error": "Admin not found"}, status=status.HTTP_404_NOT_FOUND
+                    )
             else:
-                return Response(
-                    admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                # Validate admin data
+                validation_error = validate_user_data(
+                    admin_data,
+                    [
+                        "user_name",
+                        "last_name",
+                        "email_address",
+                        "document_type",
+                        "user_document",
+                    ],
                 )
+                if validation_error:
+                    return validation_error
+
+                # Generate temporary password
+                temp_password = get_random_string(10)
+                hashed_password = hash_password(temp_password)
+
+                # Create admin user
+                admin_serializer = UserSerializer(
+                    data={
+                        "user_name": admin_data.get("user_name"),
+                        "last_name": admin_data.get("last_name"),
+                        "email_address": admin_data.get("email_address"),
+                        "user_password": hashed_password,
+                        "document_type": admin_data.get("document_type"),
+                        "user_document": admin_data.get("user_document"),
+                        "created_date": created_date,
+                    }
+                )
+
+                if admin_serializer.is_valid():
+                    admin = admin_serializer.save()
+                    admin.role.add(Role.objects.get(pk=2))
+                else:
+                    return Response(
+                        admin_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                    )
+                # Send admin password
+                send_admin_password(admin_data.get("email_address"), temp_password)
 
             # Create parking
             parking = self.create_parking(request.data, created_date, admin)
@@ -200,13 +211,28 @@ class ParkingViewSet(BaseViewSet):
             # Create related models
             self.create_related_models(parking, request.data, created_date)
 
-            # Send admin password
-            send_admin_password(admin_data.get("email_address"), temp_password)
-
             return Response(
                 {"message": "Parqueadero creado exitosamente"},
                 status=status.HTTP_201_CREATED,
             )
+
+    # Solo para desarrollo
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if latitude and longitude are not null
+        if instance.latitude is None and instance.longitude is None:
+            city = instance.city
+            instance.latitude, instance.longitude = generate_random_coordinates(city.id)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     def create_parking(self, data, created_date, admin):
         """
