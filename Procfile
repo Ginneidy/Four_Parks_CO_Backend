@@ -1,1 +1,1 @@
-web: python manage.py runserver 0.0.0.0:8000
+web: gunicorn Four_Parks_CO.wsgi
