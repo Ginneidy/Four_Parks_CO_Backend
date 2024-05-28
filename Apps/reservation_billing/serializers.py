@@ -5,6 +5,7 @@ from .models import Booking, PaymentMethod, Bill, CreditCard
 from Apps.authentication.serializers import UserSerializer
 from Apps.vehicle.serializers import VehicleSerializer
 from Apps.vehicle.models import Vehicle
+from Apps.parking.serializers import ParkingSerializer
 
 from helpers.get_helpers import get_current_datetime
 
@@ -12,9 +13,9 @@ from helpers.get_helpers import get_current_datetime
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     total_amount = serializers.ReadOnlyField()
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     vehicle = VehicleSerializer()
-
+    user = UserSerializer()
+    parking = ParkingSerializer()
     class Meta:
         model = Booking
         fields = [
