@@ -6,7 +6,6 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-print (f"templates dir: {TEMPLATES_DIR}")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -38,7 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,39 +67,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "Four_Parks_CO.wsgi.application"
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "fourParks",
-        "USER": "postgres",
-        "PASSWORD": "root",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.environ.get("DB_NAME"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST"),
+        "PORT": os.environ.get("DB_PORT"),
     }
 }
 
-if not DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USER"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST"),
-            "PORT": os.environ.get("DB_PORT"),
-        }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
-            "NAME": "fourParks",
-            "USER": "postgres",
-            "PASSWORD": "root",
-            "HOST": "localhost",
-            "PORT": "5432",
-        }
-    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -134,10 +112,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
+""" STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
+ """
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -147,9 +125,7 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_HEADERS = (
     "accept",
