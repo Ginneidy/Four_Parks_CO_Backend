@@ -5,28 +5,18 @@ from .models import Booking, PaymentMethod, Bill, CreditCard
 from Apps.authentication.serializers import UserSerializer
 from Apps.vehicle.serializers import VehicleSerializer
 from Apps.vehicle.models import Vehicle
+from Apps.parking.models import Parking
 from Apps.parking.serializers import ParkingSerializer
 
 from helpers.get_helpers import get_current_datetime
 
 
-class BookingSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    total_amount = serializers.ReadOnlyField()
+class BookingWriteSerializer(serializers.ModelSerializer):
     vehicle = VehicleSerializer()
-    user = UserSerializer()
-    parking = ParkingSerializer()
+
     class Meta:
         model = Booking
-        fields = [
-            "id",
-            "check_in",
-            "user",
-            "parking",
-            "vehicle",
-            "check_out",
-            "total_amount",
-        ]
+        fields = "__all__"
 
     def validate(self, data):
         # Validar que check_in sea anterior a check_out
@@ -46,6 +36,17 @@ class BookingSerializer(serializers.ModelSerializer):
             vehicle=vehicle, created_date=get_current_datetime(), **validated_data
         )
         return booking
+
+
+class BookingReadSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    parking = ParkingSerializer()
+    vehicle = VehicleSerializer()
+
+    class Meta:
+        model = Booking
+        fields = "__all__"
+
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):

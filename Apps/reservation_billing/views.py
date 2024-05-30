@@ -10,10 +10,11 @@ from django.http import HttpResponse
 
 from Apps.reservation_billing.models import Booking, PaymentMethod, Bill, CreditCard
 from Apps.reservation_billing.serializers import (
-    BookingSerializer,
+    BookingWriteSerializer,
     PaymentMethodSerializer,
     BillSerializer,
     CreditCardSerializer,
+    BookingReadSerializer,
 )
 from Apps.vehicle.models import Vehicle
 from Apps.baseViewSet import BaseViewSet
@@ -38,10 +39,14 @@ def hacer_reserva(user, credit_card, booking):
 
 class BookingViewSet(BaseViewSet):
     queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
+    serializer_class = BookingWriteSerializer  # Serializer por defecto
+
+    def get_serializer_class(self):
+        if self.action in ["list", "retrieve"]:
+            return BookingReadSerializer
+        return BookingWriteSerializer
 
     def create(self, request, *args, **kwargs):
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -54,7 +59,7 @@ class BookingViewSet(BaseViewSet):
 
         # send_mail_confirmation_reservation(user, parking, serializer.data)
 
-        # # TODO: Implementar la fidelización
+        # TODO: Implementar la fidelización
         # send_payment_confirmation_mail(user, credit_card, booking)
 
         return Response(

@@ -11,7 +11,7 @@ class VehicleType(BaseModel):
 
 
 class Vehicle(BaseModel):
-    plate = models.CharField(unique=True, max_length=8)
+    plate = models.CharField(max_length=8)
     vehicle_type = models.ForeignKey(VehicleType, models.DO_NOTHING)
 
     class Meta:
