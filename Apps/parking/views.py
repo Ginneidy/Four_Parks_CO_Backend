@@ -134,6 +134,31 @@ class ParkingViewSet(BaseViewSet):
             filename=f"reporte_parqueadero_{start_date.date()}_a_{(end_date - timedelta(days=1)).date()}.pdf",
         )
 
+    # [GET] api/parking/parkings/admin_details/?admin_id={id}
+    @action(detail=False, methods=["GET"])
+    def parking_admin(self, request):
+        admin_id = request.query_params.get("admin_id")
+        if not admin_id:
+            return Response(
+                {"error": "admin_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            admin = User.objects.get(id=admin_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Admin user does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        parking = Parking.objects.filter(admin=admin).first()
+        if not parking:
+            return Response(
+                {"error": "No parking found for the admin user"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = ParkingSerializer(parking)
+        return Response(serializer.data)
+
     # [POST] api/parking/parkings/
     def create(self, request, *args, **kwargs):
         """
@@ -344,6 +369,7 @@ class ParkingViewSet(BaseViewSet):
                 parking.fee.add(fee)
 
         parking.save()
+
 
 
 class ParkingTypeViewSet(BaseViewSet):
