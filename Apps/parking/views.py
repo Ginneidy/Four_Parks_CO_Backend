@@ -64,11 +64,18 @@ class ParkingViewSet(BaseViewSet):
             parking=parking, check_out__gte=datetime.now()
         )
         total_booked_spaces = bookings.count()
-        available_capacity = parking.spaces - total_booked_spaces
 
-        current_occupation = parking.spaces - available_capacity
+        if parking.spaces == 0:
+            occupation_percentage = (
+                0.0  # Evitar división por cero si no hay espacios en el parking
+            )
+        else:
+            occupation_percentage = round(
+                (total_booked_spaces / parking.spaces) * 100, 1
+            )
+
         return Response(
-            {"current_occupation": current_occupation},
+            {"occupation_percentage": occupation_percentage},
             status=status.HTTP_200_OK,
         )
 

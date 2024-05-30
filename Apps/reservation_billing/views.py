@@ -1,4 +1,8 @@
 from datetime import datetime
+from django.db.models.functions import (
+    TruncDate,
+)  # Import the TruncDate and Count functions
+from django.db.models import Count
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -62,6 +66,31 @@ class BookingViewSet(BaseViewSet):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+    # [GET] api/reservation/bookings/daily_reservations/?admin_id={admin_id}
+    @action(detail=False, methods=["GET"])
+    def daily_reservations(self, request):
+        admin_id = request.query_params.get("admin_id")
+        if not admin_id:
+            return Response(
+                {"error": "Admin ID es requerido"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        bookings = Booking.objects.filter(parking__admin_id=admin_id)
+
+        daily_reservations = (
+            bookings.annotate(date=TruncDate("created_date"))
+            .values("date")
+            .annotate(value=Count("id"))
+            .order_by("-date")[:10]
+        )
+
+        response_data = [
+            {"date": entry["date"], "value": entry["value"]}
+            for entry in daily_reservations
+        ]
+
+        return Response({"dailyReservations": response_data})
 
     # [GET] api/reservation/bookings/parking_bookings/?admin_id={admin_id}
     @action(detail=False, methods=["GET"])
