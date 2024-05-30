@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.db import models
 from Apps.authentication.models import User
 from Apps.parking.models import Parking
@@ -40,7 +41,7 @@ class Booking(BaseModel):
         total += (remaining_seconds // 60) * minute_fee
 
         return total
-
+    
     class Meta:
         managed = False
         db_table = "booking"

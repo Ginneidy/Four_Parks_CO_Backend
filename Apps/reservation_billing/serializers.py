@@ -1,11 +1,11 @@
 from rest_framework import serializers
+from django.utils.timezone import now
 
-from Apps.authentication.models import User
 from .models import Booking, PaymentMethod, Bill, CreditCard
+
 from Apps.authentication.serializers import UserSerializer
 from Apps.vehicle.serializers import VehicleSerializer
 from Apps.vehicle.models import Vehicle
-from Apps.parking.models import Parking
 from Apps.parking.serializers import ParkingSerializer
 
 from helpers.get_helpers import get_current_datetime
@@ -42,10 +42,23 @@ class BookingReadSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     parking = ParkingSerializer()
     vehicle = VehicleSerializer()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Booking
         fields = "__all__"
+        
+    def get_status(self, obj):
+        """
+        Determine the status of the booking.
+        Status can be "Confirmada", "En curso", or "Completada".
+        """
+        if Bill.objects.filter(booking=obj).exists():
+            return "Completada"
+        elif obj.check_in <= now() <= obj.check_out:
+            return "En curso"
+        else:
+            return "Confirmada"
 
 
 
