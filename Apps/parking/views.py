@@ -41,6 +41,37 @@ class ParkingViewSet(BaseViewSet):
     queryset = Parking.objects.all()
     serializer_class = ParkingSerializer
 
+    # [GET] api/parking/parkings/occupation/?admin_id={id}
+    @action(detail=False, methods=["GET"])
+    def parking_occupation(self, request):
+        admin_id = request.query_params.get("admin_id")
+
+        if not admin_id:
+            return Response(
+                {"error": "admin_id es requerido"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            parking = Parking.objects.get(admin_id=admin_id)
+        except Parking.DoesNotExist:
+            return Response(
+                {"error": "Parking no encontrado para el usuario admin"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Calcular la capacidad disponible
+        bookings = Booking.objects.filter(
+            parking=parking, check_out__gte=datetime.now()
+        )
+        total_booked_spaces = bookings.count()
+        available_capacity = parking.spaces - total_booked_spaces
+
+        current_occupation = parking.spaces - available_capacity
+        return Response(
+            {"current_occupation": current_occupation},
+            status=status.HTTP_200_OK,
+        )
+
     # [POST] api/parking/parkings/parking_usage_report/
     @action(detail=False, methods=["POST"])
     def parking_usage_report(self, request):
@@ -369,7 +400,6 @@ class ParkingViewSet(BaseViewSet):
                 parking.fee.add(fee)
 
         parking.save()
-
 
 
 class ParkingTypeViewSet(BaseViewSet):
