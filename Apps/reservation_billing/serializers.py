@@ -43,11 +43,12 @@ class BookingReadSerializer(serializers.ModelSerializer):
     parking = ParkingSerializer()
     vehicle = VehicleSerializer()
     status = serializers.SerializerMethodField()
+    total_amount = serializers.ReadOnlyField()
 
     class Meta:
         model = Booking
         fields = "__all__"
-        
+
     def get_status(self, obj):
         """
         Determine the status of the booking.

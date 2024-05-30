@@ -28,6 +28,7 @@ from helpers.email_helpers import send_admin_password
 from helpers.location_helpers import generate_random_coordinates
 from helpers.password_helpers import hash_password
 from helpers.PDF.parking_usage import generate_parking_usage_pdf
+from django.db.models.functions import TruncMonth
 
 
 # api/parking/schedules
@@ -40,6 +41,8 @@ class ScheduleViewSet(BaseViewSet):
 class ParkingViewSet(BaseViewSet):
     queryset = Parking.objects.all()
     serializer_class = ParkingSerializer
+
+    
 
     # [GET] api/parking/parkings/occupation/?admin_id={id}
     @action(detail=False, methods=["GET"])

@@ -24,7 +24,7 @@ class Booking(BaseModel):
 
         # Obtenemos las tarifas
         hourly_fee = fees.get(fee_type__description="hora").amount
-        daily_fee = fees.get(fee_type__description="dia").amount
+        daily_fee = fees.get(fee_type__description="día").amount
         minute_fee = fees.get(fee_type__description="minuto").amount
         reservation_fee = fees.get(fee_type__description="reserva").amount
 
@@ -40,7 +40,6 @@ class Booking(BaseModel):
         total += (remaining_seconds // 3600) * hourly_fee
         remaining_seconds %= 3600
         total += (remaining_seconds // 60) * minute_fee
-
         return total
     
     class Meta:
