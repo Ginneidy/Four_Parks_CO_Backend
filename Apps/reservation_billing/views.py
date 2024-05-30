@@ -30,9 +30,6 @@ from helpers.email_helpers import (
 )
 
 
-# views.py
-
-
 def hacer_reserva(user, credit_card, booking):
     return HttpResponse("Reserva exitosa")
 
@@ -65,6 +62,24 @@ class BookingViewSet(BaseViewSet):
         return Response(
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
+
+    # [GET] api/reservation/bookings/today_bookings/
+    @action(detail=False, methods=["GET"])
+    def today_bookings(self, request):
+        admin_id = request.query_params.get("admin_id")
+        current_date = datetime.now().date()
+        print("current_date : ", current_date)
+        bookings = Booking.objects.filter(parking__admin=admin_id)
+        print("Booking check-in date : ", bookings[0].check_in.date())
+        count = 0
+        for booking in bookings:
+            print("Booking check-in date : ", booking.check_in.date())
+
+        for booking in bookings:
+            if booking.check_in.date() == current_date:
+                count += 1
+
+        return Response({"today_bookings": count})
 
     # [GET] api/reservation/bookings/{user_id}/user_bookings/
     @action(detail=True, methods=["GET"])
