@@ -63,6 +63,14 @@ class BookingViewSet(BaseViewSet):
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
+    # [GET] api/reservation/bookings/parking_bookings/?admin_id={admin_id}
+    @action(detail=False, methods=["GET"])
+    def parking_bookings(self, request):
+        admin_id = request.query_params.get("admin_id")
+        bookings = Booking.objects.filter(parking__admin=admin_id)
+        serializer = BookingReadSerializer(bookings, many=True)
+        return Response(serializer.data)
+
     # [GET] api/reservation/bookings/today_bookings/
     @action(detail=False, methods=["GET"])
     def today_bookings(self, request):
