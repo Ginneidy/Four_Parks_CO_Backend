@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
 
+from Apps.reservation_billing.models import Booking
+
 from .models import User, Role
 from .serializers import UserSerializer
 from Apps.baseViewSet import BaseViewSet
@@ -20,6 +22,40 @@ from helpers.password_helpers import hash_password
 class UserViewSet(BaseViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    # [GET] /api/auth/users/park_users/?admin_id={admin_id}
+    @action(detail=False, methods=["GET"])
+    def park_users(self, request):
+        admin_id = request.query_params.get("admin_id")
+        if not admin_id:
+            return Response(
+                {"error": "Admin ID es requerido"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        bookings = Booking.objects.filter(parking__admin_id=admin_id)
+        user_ids = bookings.values_list("user", flat=True)
+
+        # Crear una lista para almacenar los datos del usuario junto con el número de reservas
+        users_data = []
+        for user_id in user_ids:
+            # Obtener el usuario
+            user = User.objects.get(id=user_id)
+
+            # Serializar los datos del usuario
+            user_serializer = UserSerializer(user)
+
+            # Contar el número de reservas del usuario en este parqueadero
+            num_bookings = bookings.filter(user_id=user_id).count()
+
+            # Crear un diccionario con los datos del usuario serializados y el número de reservas
+            user_data = {
+                "user": user_serializer.data,
+                "num_bookings": num_bookings,
+            }
+
+            users_data.append(user_data)
+
+        return Response(users_data)
 
     # Action to handle user login
     # /api/auth/users/login/
