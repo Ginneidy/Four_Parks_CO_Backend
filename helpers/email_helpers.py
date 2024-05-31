@@ -55,11 +55,11 @@ def send_mail_confirmation_reservation(user, parking, booking):
     qr_buffer = generate_qr_code(booking_code)
     qr_buffer.seek(0)  # Reset buffer position after generating QR code
 
-    # Convert booking["check_in"] and booking["check_out"] to datetime objects
-    check_in = datetime.strptime(booking.check_in, "%Y-%m-%dT%H:%M:%SZ")
-    check_out = datetime.strptime(booking.check_out, "%Y-%m-%dT%H:%M:%SZ")
+    print(f"check_in: { booking['check_in']})")
 
-    # Generar PDF con el código QR
+    check_in = datetime.fromisoformat(booking["check_in"])
+    check_out = datetime.fromisoformat(booking["check_out"])
+    
     reserva_detalles = {
         "reservation_id": booking_code,
         "parking_name": parking.park_name,

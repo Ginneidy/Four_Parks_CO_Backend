@@ -15,7 +15,6 @@ class Booking(BaseModel):
     vehicle = models.ForeignKey(Vehicle, models.DO_NOTHING)
     check_out = models.DateTimeField()
 
-
     @property
     def total_amount(self):
         vehicle_type = self.vehicle.vehicle_type

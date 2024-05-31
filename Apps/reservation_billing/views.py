@@ -56,9 +56,8 @@ class BookingViewSet(BaseViewSet):
         user = get_object_or_404(User, id=request.data.get("user"))
         parking = get_object_or_404(Parking, id=request.data.get("parking"))
         credit_card = get_object_or_404(CreditCard, client=user)
-        booking = get_object_or_404(Booking, id=serializer.data.get("id"))
 
-        # send_mail_confirmation_reservation(user, parking, serializer.data)
+        send_mail_confirmation_reservation(user, parking, serializer.data)
 
         # TODO: Implementar la fidelización
         # send_payment_confirmation_mail(user, credit_card, booking)
@@ -130,6 +129,8 @@ class BookingViewSet(BaseViewSet):
     @action(detail=False, methods=["POST"])
     def booking_total(self, request, *args, **kwargs):
         data = request.data
+
+        print("Data : ", data)
         vehicle_type_id = data.get(
             "vehicle_type", 3
         )  # Usar el tipo de vehículo predeterminado si no se proporciona
@@ -150,11 +151,13 @@ class BookingViewSet(BaseViewSet):
         check_out = datetime.fromisoformat(data.get("check_out"))
 
         fees = parking.fee.filter(vehicle_type=vehicle_type)
-
+        print("Fees : ", fees)
+        for fee in fees:
+            print("Fee : ", fee.fee_type.description)
         # Obtenemos las tarifas
         try:
             hourly_fee = fees.get(fee_type__description="hora").amount
-            daily_fee = fees.get(fee_type__description="dia").amount
+            daily_fee = fees.get(fee_type__description="día").amount
             minute_fee = fees.get(fee_type__description="minuto").amount
             reservation_fee = fees.get(fee_type__description="reserva").amount
         except Fee.DoesNotExist:
