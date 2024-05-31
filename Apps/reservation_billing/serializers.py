@@ -11,8 +11,6 @@ from Apps.parking.serializers import ParkingSerializer
 from helpers.get_helpers import get_current_datetime
 
 
-
-
 class BookingWriteSerializer(serializers.ModelSerializer):
     vehicle = VehicleSerializer()
     total_amount = serializers.ReadOnlyField()
@@ -63,7 +61,6 @@ class BookingReadSerializer(serializers.ModelSerializer):
             return "En curso"
         else:
             return "Confirmada"
-
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):

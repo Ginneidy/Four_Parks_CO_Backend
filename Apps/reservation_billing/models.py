@@ -27,7 +27,10 @@ class Booking(BaseModel):
         minute_fee = fees.get(fee_type__description="minuto").amount
         reservation_fee = fees.get(fee_type__description="reserva").amount
 
-        duration = self.check_out - self.check_in
+        check_in = timezone.make_aware(self.check_in)
+        check_out = timezone.make_aware(self.check_out)
+
+        duration = check_out - check_in
 
         # Cálculo del total
         total = reservation_fee
@@ -40,7 +43,7 @@ class Booking(BaseModel):
         remaining_seconds %= 3600
         total += (remaining_seconds // 60) * minute_fee
         return total
-    
+
     class Meta:
         managed = False
         db_table = "booking"

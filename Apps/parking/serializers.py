@@ -9,6 +9,8 @@ from Apps.authentication.serializers import UserSerializer
 from Apps.pricing.serializers import LoyaltySerializer, FeeSerializer
 from Apps.reservation_billing.models import Booking
 
+from django.utils import timezone
+
 
 class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -45,7 +47,7 @@ class ParkingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_available_capacity(self, obj):
-        bookings = Booking.objects.filter(parking=obj, check_out__gte=datetime.now())
+        bookings = Booking.objects.filter(parking=obj, check_out__gte=timezone.now())
         total_booked_spaces = bookings.count()
         return obj.spaces - total_booked_spaces
 

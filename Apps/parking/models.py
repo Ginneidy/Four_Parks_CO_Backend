@@ -2,16 +2,7 @@ from django.db import models
 from Apps.authentication.models import User
 from Apps.pricing.models import Fee
 from Apps.pricing.models import Loyalty
-from datetime import datetime
 from Apps.baseModel import BaseModel
-
-
-class ParkingType(BaseModel):
-    description = models.CharField(unique=True, max_length=30)
-
-    class Meta:
-        managed = False
-        db_table = "parking_type"
 
 
 class City(BaseModel):
@@ -38,15 +29,6 @@ class ParkingType(BaseModel):
     class Meta:
         managed = False
         db_table = "parking_type"
-
-
-class City(BaseModel):
-    city_name = models.CharField(unique=True, max_length=30)
-
-    class Meta:
-        managed = False
-        db_table = "city"
-
 
 class Parking(BaseModel):
     park_name = models.CharField(unique=True, max_length=40)

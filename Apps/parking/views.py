@@ -42,8 +42,6 @@ class ParkingViewSet(BaseViewSet):
     queryset = Parking.objects.all()
     serializer_class = ParkingSerializer
 
-    
-
     # [GET] api/parking/parkings/occupation/?admin_id={id}
     @action(detail=False, methods=["GET"])
     def parking_occupation(self, request):
